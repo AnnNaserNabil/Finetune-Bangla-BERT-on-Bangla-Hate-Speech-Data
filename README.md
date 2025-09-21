@@ -1,10 +1,10 @@
-# BanglaBERT Cyberbullying Detection Fine-Tuning
+# BanglaBERT HateSpeech Detection Fine-Tuning
 
 ![BanglaBERT Logo](https://img.shields.io/badge/Model-BanglaBERT-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Python](https://img.shields.io/badge/Python-3.8%2B-yellow)
 
 ## Project Overview
 
-This project provides a modular Python framework for fine-tuning the BanglaBERT model (from `sagorsarker/bangla-bert-base`) on a Bangla cyberbullying dataset for multi-label classification. The dataset consists of comments labeled with five binary categories: `bully`, `sexual`, `religious`, `threat`, and `spam`.
+This project provides a modular Python framework for fine-tuning the BanglaBERT model (from `sagorsarker/bangla-bert-base`) on a Bangla cyberbullying dataset for multi-label classification. The dataset consists of comments labeled with one binary categories: 'hate/nonhate' 
 
 The framework uses PyTorch for training, Hugging Face Transformers for model handling, and MLflow for experiment tracking. It supports K-Fold cross-validation (default: 5 folds), class weighting for imbalanced labels, early stopping, and optional freezing of base layers during fine-tuning.
 
@@ -23,13 +23,13 @@ Run fine-tuning via `main.py` with command-line arguments. All experiments log t
 ### Running in Google Colab (Recommended for Free GPU)
 1. Open Colab: [colab.research.google.com](https://colab.research.google.com).
 2. Enable GPU: Runtime > Change runtime type > T4 GPU.
-3. Clone repo: `!git clone https://github.com/SaifSiddique009/Finetune-Bangla-BERT-on-Bangla-Cyber-Bullying-Data.git`
-4. `%cd Finetune-Bangla-BERT-on-Bangla-Cyber-Bullying-Data`
+3. Clone repo: `!git clone https://github.com/AnnNaserNabil/Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data.git`
+4. `%cd Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data`
 5. Install deps: `!pip install -q transformers torch scikit-learn pandas numpy tqdm mlflow`
 6. Pick an experiment from `experiments.py` (open the file, copy a dict's values).
 7. Run command (replace with your values):
    ```
-   !python main.py --batch 32 --lr 2e-5 --epochs 20 --author_name 'yourname' --dataset_path 'data\1_Multilablel_Cyberbully_Data.csv' --freeze_base --mlflow_experiment_name 'Bangla-Cyberbullying-Experiments'
+   !python main.py --batch 32 --lr 2e-5 --epochs 20 --author_name 'yourname' --dataset_path 'data\HateSpeech.csv' --freeze_base --mlflow_experiment_name 'Bangla-HateSpeech-Experiments'
    ```
    - Full args:
      - `--batch`: Batch size (e.g., 16, 32, 64).
@@ -50,7 +50,7 @@ Run fine-tuning via `main.py` with command-line arguments. All experiments log t
    - Download `mlruns_{your name}.zip` from Colab's files sidebar.
 
 ### Viewing Results Locally
-1. Unzip `mlruns_{your name}.zip` to a local directory (e.g., `experiments/mlruns_tarikh`).
+1. Unzip `mlruns_{your name}.zip` to a local directory (e.g., `experiments/mlruns_{your name}`).
 2. In VS Code or terminal: Navigate to the dir, activate venv, run:
    ```
    mlflow ui
