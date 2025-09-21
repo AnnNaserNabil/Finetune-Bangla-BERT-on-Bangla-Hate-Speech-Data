@@ -1,7 +1,3 @@
-# import sys, os
-# sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-# print(sys.path)
-
 import data
 from model import BertMultiLabelClassifier, freeze_base_layers
 import torch
@@ -14,18 +10,16 @@ from tqdm import tqdm
 import mlflow
 
 def calculate_class_weights(labels):
-    # Ensure labels is 2D (for single-label case, reshape to (n, 1))
     if labels.ndim == 1:
         labels = labels[:, np.newaxis]  # Reshape to (n, 1)
-    
-    pos_counts = np.sum(labels, axis=0)  # Shape: (num_labels,)
-    neg_counts = len(labels) - pos_counts  # Shape: (num_labels,)
-    weights = neg_counts / pos_counts  # Shape: (num_labels,)
-    return torch.FloatTensor(weights)  # Convert to tensor
+    pos_counts = np.sum(labels, axis=0)
+    neg_counts = len(labels) - pos_counts
+    weights = neg_counts / pos_counts
+    return torch.FloatTensor(weights)
 
 def calculate_metrics(y_true, y_pred):
     y_pred_binary = (y_pred > 0.5).astype(int)
-    accuracy = accuracy_score(y_true, y_pred_binary)
+    accuracy = accuracy_score(y_true, y_pred_binary, normalize=True)
     precision = precision_score(y_true, y_pred_binary, average='weighted', zero_division=0)
     recall = recall_score(y_true, y_pred_binary, average='weighted', zero_division=0)
     f1 = f1_score(y_true, y_pred_binary, average='weighted', zero_division=0)
@@ -75,7 +69,6 @@ def evaluate_model(model, dataloader, device):
 def run_kfold_training(config, comments, labels, tokenizer, device):
     mlflow.set_experiment(config.mlflow_experiment_name)
     with mlflow.start_run(run_name=f"{config.author_name}_{config.batch}_{config.lr}_{config.epochs}"):
-        # Log parameters
         mlflow.log_params({
             'batch_size': config.batch,
             'learning_rate': config.lr,
@@ -105,7 +98,7 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
 
             model = BertMultiLabelClassifier(config.model_path, len(data.LABEL_COLUMNS))
             if config.freeze_base:
-                freeze_base_layers(model)
+                freeze_base_layers(model)  # Fixed: Call standalone function
             model.to(device)
 
             optimizer = AdamW(model.parameters(), lr=config.lr, weight_decay=0.01, eps=1e-8)
@@ -132,16 +125,12 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
                     print(f"Early stopping at epoch {epoch+1}")
                     break
 
-                # Log epoch metrics to MLflow (per fold per epoch)
                 mlflow.log_metrics({f"fold_{fold}_epoch_{epoch}_train_loss": train_loss, **{f"fold_{fold}_epoch_{epoch}_{k}": v for k, v in val_metrics.items()}})
 
             fold_results.append(best_metrics)
-            # Log best fold metrics
             mlflow.log_metrics({f"fold_{fold}_{k}": v for k, v in best_metrics.items()})
 
-        # Calculate and log average metrics
         avg_metrics = {key: np.mean([result[key] for result in fold_results]) for key in fold_results[0].keys() if key != 'loss'}
         mlflow.log_metrics({f"avg_{k}": v for k, v in avg_metrics.items()})
 
-        # Optionally log model
         mlflow.pytorch.log_model(model, "model")
