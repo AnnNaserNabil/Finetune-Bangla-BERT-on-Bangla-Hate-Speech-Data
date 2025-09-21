@@ -98,7 +98,7 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
 
             model = BertMultiLabelClassifier(config.model_path, len(data.LABEL_COLUMNS))
             if config.freeze_base:
-                freeze_base_layers(model)  # Fixed: Call standalone function
+                freeze_base_layers(model)
             model.to(device)
 
             optimizer = AdamW(model.parameters(), lr=config.lr, weight_decay=0.01, eps=1e-8)
