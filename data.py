@@ -33,7 +33,7 @@ class CyberbullyingDataset(Dataset):
         labels = np.array(labels, dtype=np.float32)  # Ensure float32
         if labels.ndim == 0:  # Scalar case (single label)
             labels = labels.reshape(-1)  # Reshape to [1]
-        
+
         return {
             'input_ids': encoding['input_ids'].flatten(),
             'attention_mask': encoding['attention_mask'].flatten(),
