@@ -14,10 +14,14 @@ from tqdm import tqdm
 import mlflow
 
 def calculate_class_weights(labels):
-    pos_counts = np.sum(labels, axis=0)
-    neg_counts = len(labels) - pos_counts
-    weights = neg_counts / pos_counts
-    return torch.FloatTensor(weights)
+    # Ensure labels is 2D (for single-label case, reshape to (n, 1))
+    if labels.ndim == 1:
+        labels = labels[:, np.newaxis]  # Reshape to (n, 1)
+    
+    pos_counts = np.sum(labels, axis=0)  # Shape: (num_labels,)
+    neg_counts = len(labels) - pos_counts  # Shape: (num_labels,)
+    weights = neg_counts / pos_counts  # Shape: (num_labels,)
+    return torch.FloatTensor(weights)  # Convert to tensor
 
 def calculate_metrics(y_true, y_pred):
     y_pred_binary = (y_pred > 0.5).astype(int)
