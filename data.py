@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import torch
 
-LABEL_COLUMNS = ['bully', 'sexual', 'religious', 'threat', 'spam']
+LABEL_COLUMNS = ['HateSpeech']
 
 class CyberbullyingDataset(Dataset):
     def __init__(self, comments, labels, tokenizer, max_length=128):
