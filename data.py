@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split, KFold
 from transformers import BertTokenizer
 from torch.utils.data import Dataset
 import numpy as np
