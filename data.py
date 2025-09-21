@@ -38,6 +38,10 @@ class CyberbullyingDataset(Dataset):
 def load_data(dataset_path):
     """Load CSV with columns: Comments, HateSpeech. No preprocessing."""
     df = pd.read_csv(dataset_path, usecols=["Comments", "HateSpeech"])
+    # If labels are "hate"/"nonhate", map them; otherwise just coerce to ints
+    if df["HateSpeech"].dtype == object:
+        mapping = {"hate": 1, "nonhate": 0, "1": 1, "0": 0}
+        df["HateSpeech"] = df["HateSpeech"].map(mapping).astype("Int64")
     comments = df["Comments"].to_numpy()
     labels = df["HateSpeech"].to_numpy()  # shape (n,)
     return comments, labels
