@@ -29,7 +29,7 @@ Run fine-tuning via `main.py` with command-line arguments. All experiments log t
 6. Pick an experiment from `experiments.py` (open the file, copy a dict's values).
 7. Run command (replace with your values):
    ```
-   !python main.py --batch 32 --lr 2e-5 --epochs 20 --author_name 'yourname' --dataset_path 'data\HateSpeech.csv' --freeze_base --mlflow_experiment_name 'Bangla-HateSpeech-Experiments'
+   !python main.py --batch 32 --lr 2e-5 --epochs 20 --author_name 'yourname' --dataset_path '/content/Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data/data/HateSpeech.csv' --freeze_base --mlflow_experiment_name 'Bangla-HateSpeech-Experiments'
    ```
    - Full args:
      - `--batch`: Batch size (e.g., 16, 32, 64).
