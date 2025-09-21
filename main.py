@@ -12,7 +12,7 @@ def main():
 
     tokenizer = BertTokenizer.from_pretrained(config.model_path)
 
-    comments, labels = data.load_and_preprocess_data(config.dataset_path)
+    comments, labels = data.load_data(config.dataset_path)
     print(f"Loaded {len(comments)} samples with {len(data.LABEL_COLUMNS)} labels.")
 
     train.run_kfold_training(config, comments, labels, tokenizer, device)
