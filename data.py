@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold
 from transformers import BertTokenizer
 from torch.utils.data import Dataset
 import numpy as np
@@ -35,17 +35,11 @@ class CyberbullyingDataset(Dataset):
             'labels': torch.tensor(labels, dtype=torch.float)
         }
 
-def load_and_preprocess_data(dataset_path):
-    df = pd.read_csv(dataset_path)
-    # Drop unnecessary columns if present
-    columns_to_drop = [col for col in ['Gender', 'Profession'] if col in df.columns]
-    df_clean = df.drop(columns_to_drop, axis=1) if columns_to_drop else df
-    # Ensure label columns exist
-    for col in LABEL_COLUMNS:
-        if col not in df_clean.columns:
-            raise ValueError(f"Missing label column: {col}")
-    comments = df_clean['comment'].values
-    labels = df_clean[LABEL_COLUMNS].values
+def load_data(dataset_path):
+    """Load CSV with columns: Comments, HateSpeech. No preprocessing."""
+    df = pd.read_csv(dataset_path, usecols=["Comments", "HateSpeech"])
+    comments = df["Comments"].to_numpy()
+    labels = df["HateSpeech"].to_numpy()  # shape (n,)
     return comments, labels
 
 def prepare_kfold_splits(comments, labels, num_folds=5):
