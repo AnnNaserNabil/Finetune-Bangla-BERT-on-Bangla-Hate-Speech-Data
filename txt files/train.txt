@@ -8,7 +8,6 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import numpy as np
 from tqdm import tqdm
 import mlflow
-import os  # Add for file operations
 
 def calculate_class_weights(labels):
     if labels.ndim == 1:
@@ -81,11 +80,6 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
             'model_path': config.model_path
         })
 
-        # Define checkpoint directory in Google Drive
-        checkpoint_dir = '/content/drive/MyDrive/checkpoints'
-        os.makedirs(checkpoint_dir, exist_ok=True)
-        checkpoint_prefix = f"{checkpoint_dir}/checkpoint_fold"
-
         kfold_splits = data.prepare_kfold_splits(comments, labels, config.num_folds)
         fold_results = []
 
@@ -114,42 +108,11 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
             best_f1 = 0
             patience = 5
             patience_counter = 0
-            start_epoch = 0
-            checkpoint_path = f"{checkpoint_prefix}_{fold}.pt"
 
-            # Check for existing checkpoint
-            if os.path.exists(checkpoint_path):
-                print(f"Loading checkpoint from {checkpoint_path}")
-                checkpoint = torch.load(checkpoint_path, map_location=device)
-                model.load_state_dict(checkpoint['model_state_dict'])
-                optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-                scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-                start_epoch = checkpoint['epoch'] + 1
-                best_f1 = checkpoint['best_f1']
-                patience_counter = checkpoint['patience_counter']
-                print(f"Resuming from epoch {start_epoch}")
-
-            for epoch in range(start_epoch, config.epochs):
+            for epoch in range(config.epochs):
                 train_loss = train_epoch(model, train_loader, optimizer, scheduler, device, class_weights)
                 val_metrics = evaluate_model(model, val_loader, device)
                 print(f"Epoch {epoch+1}: Train Loss={train_loss:.4f}, Val F1={val_metrics['f1']:.4f}")
-
-                # Save checkpoint
-                checkpoint = {
-                    'epoch': epoch,
-                    'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'scheduler_state_dict': scheduler.state_dict(),
-                    'best_f1': best_f1,
-                    'patience_counter': patience_counter,
-                }
-                # Delete previous checkpoint for this fold
-                if epoch > start_epoch and os.path.exists(checkpoint_path):
-                    os.remove(checkpoint_path)
-                    print(f"Deleted previous checkpoint: {checkpoint_path}")
-                # Save new checkpoint
-                torch.save(checkpoint, checkpoint_path)
-                print(f"Saved checkpoint: {checkpoint_path}")
 
                 if val_metrics['f1'] > best_f1:
                     best_f1 = val_metrics['f1']
@@ -166,11 +129,6 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
 
             fold_results.append(best_metrics)
             mlflow.log_metrics({f"fold_{fold}_{k}": v for k, v in best_metrics.items()})
-
-            # Delete final checkpoint after fold completion to save space
-            if os.path.exists(checkpoint_path):
-                os.remove(checkpoint_path)
-                print(f"Deleted final checkpoint for fold {fold + 1}: {checkpoint_path}")
 
         avg_metrics = {key: np.mean([result[key] for result in fold_results]) for key in fold_results[0].keys() if key != 'loss'}
         mlflow.log_metrics({f"avg_{k}": v for k, v in avg_metrics.items()})

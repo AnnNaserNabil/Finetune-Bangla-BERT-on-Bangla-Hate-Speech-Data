@@ -5,3 +5,4 @@ pandas==2.2.2         # Data loading
 numpy==2.0.1          # Arrays and calculations
 tqdm==4.66.5          # Progress bars
 mlflow==2.15.1        # Experiment tracking
+google-colab
