@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import numpy as np
 from tqdm import tqdm
 import mlflow
-import os  # Add for file operations
+import os
 
 def calculate_class_weights(labels):
     if labels.ndim == 1:
@@ -115,16 +115,21 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
             patience = 5
             patience_counter = 0
             start_epoch = 0
-            checkpoint_path = f"{checkpoint_prefix}_{fold}.pt"
 
-            # Check for existing checkpoint
-            if os.path.exists(checkpoint_path):
+            # Check for existing checkpoints for this fold
+            checkpoint_path = None
+            for epoch_check in range(config.epochs):
+                potential_checkpoint = f"{checkpoint_prefix}_{fold}_epoch_{epoch_check}.pt"
+                if os.path.exists(potential_checkpoint):
+                    checkpoint_path = potential_checkpoint
+                    start_epoch = epoch_check + 1
+
+            if checkpoint_path:
                 print(f"Loading checkpoint from {checkpoint_path}")
                 checkpoint = torch.load(checkpoint_path, map_location=device)
                 model.load_state_dict(checkpoint['model_state_dict'])
                 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
                 scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-                start_epoch = checkpoint['epoch'] + 1
                 best_f1 = checkpoint['best_f1']
                 patience_counter = checkpoint['patience_counter']
                 print(f"Resuming from epoch {start_epoch}")
@@ -134,7 +139,8 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
                 val_metrics = evaluate_model(model, val_loader, device)
                 print(f"Epoch {epoch+1}: Train Loss={train_loss:.4f}, Val F1={val_metrics['f1']:.4f}")
 
-                # Save checkpoint
+                # Save checkpoint with fold and epoch in name
+                checkpoint_path = f"{checkpoint_prefix}_{fold}_epoch_{epoch}.pt"
                 checkpoint = {
                     'epoch': epoch,
                     'model_state_dict': model.state_dict(),
@@ -144,9 +150,11 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
                     'patience_counter': patience_counter,
                 }
                 # Delete previous checkpoint for this fold
-                if epoch > start_epoch and os.path.exists(checkpoint_path):
-                    os.remove(checkpoint_path)
-                    print(f"Deleted previous checkpoint: {checkpoint_path}")
+                if epoch > start_epoch:
+                    prev_checkpoint_path = f"{checkpoint_prefix}_{fold}_epoch_{epoch-1}.pt"
+                    if os.path.exists(prev_checkpoint_path):
+                        os.remove(prev_checkpoint_path)
+                        print(f"Deleted previous checkpoint: {prev_checkpoint_path}")
                 # Save new checkpoint
                 torch.save(checkpoint, checkpoint_path)
                 print(f"Saved checkpoint: {checkpoint_path}")
@@ -167,10 +175,11 @@ def run_kfold_training(config, comments, labels, tokenizer, device):
             fold_results.append(best_metrics)
             mlflow.log_metrics({f"fold_{fold}_{k}": v for k, v in best_metrics.items()})
 
-            # Delete final checkpoint after fold completion to save space
-            if os.path.exists(checkpoint_path):
-                os.remove(checkpoint_path)
-                print(f"Deleted final checkpoint for fold {fold + 1}: {checkpoint_path}")
+            # Delete final checkpoint after fold completion
+            final_checkpoint_path = f"{checkpoint_prefix}_{fold}_epoch_{epoch}.pt"
+            if os.path.exists(final_checkpoint_path):
+                os.remove(final_checkpoint_path)
+                print(f"Deleted final checkpoint for fold {fold + 1}: {final_checkpoint_path}")
 
         avg_metrics = {key: np.mean([result[key] for result in fold_results]) for key in fold_results[0].keys() if key != 'loss'}
         mlflow.log_metrics({f"avg_{k}": v for k, v in avg_metrics.items()})
