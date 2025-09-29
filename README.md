@@ -1,7 +1,3 @@
-Below is a rewritten README file for your BanglaBERT Hate Speech Detection Fine-Tuning project. It incorporates the manual Google Drive mounting instructions you specified, maintains the checkpointing feature, and addresses the TensorFlow warning. The README is clear, concise, and tailored for collaborators, with detailed steps for running in Colab, viewing results, and contributing. It also includes the project structure, dataset requirements, and troubleshooting tips to ensure smooth execution.
-
----
-
 # BanglaBERT Hate Speech Detection Fine-Tuning
 
 ![BanglaBERT](https://img.shields.io/badge/Model-BanglaBERT-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Python](https://img.shields.io/badge/Python-3.8%2B-yellow)
@@ -33,24 +29,6 @@ Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data/
 │   └── HateSpeech.csv  # Dataset (Comments, HateSpeech columns)
 ├── README.md       # This file
 ```
-
-## Dataset Requirements
-
-- **File**: `HateSpeech.csv`
-- **Columns**:
-  - `Comments`: Bangla text comments.
-  - `HateSpeech`: Labels (`hate`/`nonhate` or `1`/`0`).
-- **Location**: Place in `/content/Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data/data/HateSpeech.csv` (Colab) or specify your path via `--dataset_path`.
-
-## Prerequisites
-
-- **Python**: 3.8+
-- **Dependencies**: Install via:
-  ```bash
-  pip install torch transformers scikit-learn pandas numpy tqdm mlflow google-colab
-  ```
-- **Colab GPU**: Recommended for free GPU access (T4 or better).
-- **Google Drive**: Required for checkpoint storage and dataset access.
 
 ## Usage
 
