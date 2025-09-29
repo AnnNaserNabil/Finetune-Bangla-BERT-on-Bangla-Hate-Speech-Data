@@ -23,11 +23,16 @@ Run fine-tuning via `main.py` with command-line arguments. All experiments log t
 ### Running in Google Colab (Recommended for Free GPU)
 1. Open Colab: [colab.research.google.com](https://colab.research.google.com).
 2. Enable GPU: Runtime > Change runtime type > T4 GPU.
-3. Clone repo: `!git clone https://github.com/AnnNaserNabil/Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data.git`
-4. `%cd Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data`
-5. Install deps: `!pip install -q transformers torch scikit-learn pandas numpy tqdm mlflow google-colab`
-6. Pick an experiment from `experiments.py` (open the file, copy a dict's values).
-7. Run command (replace with your values):
+3.In a Colab cell, run the following command:
+python```
+from google.colab import drive
+drive.mount('/content/drive')
+```
+4. Clone repo: `!git clone https://github.com/AnnNaserNabil/Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data.git`
+5. `%cd Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data`
+6. Install deps: `!pip install -q transformers torch scikit-learn pandas numpy tqdm mlflow google-colab`
+7. Pick an experiment from `experiments.py` (open the file, copy a dict's values).
+8. Run command (replace with your values):
    ```
    !python main.py --batch 32 --lr 2e-5 --epochs 20 --author_name 'yourname' --dataset_path '/content/Finetune-Bangla-BERT-on-Bangla-Hate-Speech-Data/data/HateSpeech.csv' --freeze_base --mlflow_experiment_name 'Bangla-HateSpeech-Experiments'
    ```

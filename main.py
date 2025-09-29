@@ -4,23 +4,12 @@ import data
 import model
 import train
 from config import parse_arguments
-try:
-    from google.colab import drive
-    IN_COLAB = True
-except ImportError:
-    IN_COLAB = False
+import os  # Add for checking mount
 
 def main():
-    # Mount Google Drive only if in Colab
-    if IN_COLAB:
-        try:
-            drive.mount('/content/drive', force_remount=True)  # Mount Google Drive with force_remount
-            print("Google Drive mounted successfully.")
-        except Exception as e:
-            print(f"Failed to mount Google Drive: {e}")
-            raise
-    else:
-        print("Not running in Colab; skipping Google Drive mount.")
+    # Verify Google Drive is mounted
+    if not os.path.exists('/content/drive'):
+        raise FileNotFoundError("Google Drive not mounted at /content/drive. Please mount it manually before running the script.")
 
     config = parse_arguments()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
